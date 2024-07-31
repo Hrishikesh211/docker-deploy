@@ -14,8 +14,10 @@ variables:
   containerRegistry: 'deployairflowcicd.azurecr.io'
   composeFile: 'docker-compose.yml'
   tag: '$(Build.BuildId)'
+
+
   vmImageName: 'ubuntu-latest'
-  azureServiceConnectionId: $(azureServiceConnectionId)
+
 
 stages:
 - stage: Build
