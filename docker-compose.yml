@@ -59,4 +59,3 @@ services:
       - ${WEBAPP_STORAGE_HOME}/init_airflow.sh:/init_airflow.sh
     command: /bin/bash -c "/init_airflow.sh"
     restart: always
-
