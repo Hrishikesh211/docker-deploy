@@ -13,27 +13,37 @@ variables:
   dockerRegistryServiceConnection: '2304366a-a596-4b67-9a99-4e1ff6b22c82'
   imageRepository: 'dockerdevops'
   containerRegistry: 'deployairflowcicd.azurecr.io'
-  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
+  composeFile: 'docker-compose.yml'
   tag: '$(Build.BuildId)'
-
-  # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
 stages:
 - stage: Build
-  displayName: Build and push stage
+  displayName: Build and Push Stage
   jobs:
   - job: Build
     displayName: Build
     pool:
       vmImage: $(vmImageName)
     steps:
-    - task: Docker@2
-      displayName: Build and push an image to container registry
+    - script: |
+        echo $(DOCKER_PASSWORD) | docker login $(containerRegistry) -u $(DOCKER_USERNAME) --password-stdin
+        docker-compose -f $(composeFile) build
+        docker-compose -f $(composeFile) push
+      displayName: Build and Push Services
+
+- stage: Deploy
+  displayName: Deploy Stage
+  jobs:
+  - job: Deploy
+    displayName: Deploy
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: AzureCLI@2
       inputs:
-        command: buildAndPush
-        repository: $(imageRepository)
-        dockerfile: $(dockerfilePath)
-        containerRegistry: $(dockerRegistryServiceConnection)
-        tags: |
-          $(tag)
+        azureSubscription: 'Development Subscription (d8501f72-cc6e-4c07-9f8c-b8523c3b63ec)'
+        scriptType: 'pscore'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az webapp config container set --name your_webapp_name --resource-group your_resource_group --multicontainer-config-type compose --multicontainer-config-file $(System.DefaultWorkingDirectory)/$(composeFile)
