@@ -29,17 +29,17 @@ stages:
     - task: AzureCLI@2
       inputs:
         azureSubscription: 'Development Subscription (d8501f72-cc6e-4c07-9f8c-b8523c3b63ec)'
-        scriptType: 'ps'
+        scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          Write-Host "Logging in to Azure..."
+          echo "Logging in to Azure..."
           az acr login --name $(containerRegistry)
           
-          Write-Host "Building the Docker image for airflow-webserver..."
+          echo "Building the Docker image for airflow-webserver..."
           docker-compose build airflow-webserver
           
-          Write-Host "Tagging the image for airflow-webserver..."
-          docker tag apache/airflow:2.9.3 "$(containerRegistry)/$(imageRepository):$(tag)"
+          echo "Tagging the image for airflow-webserver..."
+          docker tag apache/airflow:2.9.3 $(containerRegistry)/$(imageRepository):$(tag)
           
-          Write-Host "Pushing the image for airflow-webserver to ACR..."
-          docker push "$(containerRegistry)/$(imageRepository):$(tag)"
+          echo "Pushing the image for airflow-webserver to ACR..."
+          docker push $(containerRegistry)/$(imageRepository):$(tag)
