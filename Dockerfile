@@ -1,33 +1,21 @@
 # Use the official Apache Airflow image as the base image
 FROM apache/airflow:2.9.3
 
-# Switch to root user to install system-level dependencies
-USER root
+# Set environment variables
+ENV AIRFLOW_HOME=/opt/airflow
 
-# Install PostgreSQL client and development libraries
-RUN apt-get update && apt-get install -y \
-    libpq-dev gcc \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# Copy the requirements file (if any) and install dependencies
+# COPY requirements.txt .
+# RUN pip install --no-cache-dir -r requirements.txt
 
-# Upgrade pip to the latest version
-RUN pip install --upgrade pip
+# Copy custom scripts or files (like init_airflow.sh) if needed
+COPY init_airflow.sh /init_airflow.sh
 
-# Copy the requirements file into the container
-COPY requirements.txt /requirements.txt
+# Set permissions and make the script executable
+RUN chmod +x /init_airflow.sh
 
-# Install the dependencies from requirements.txt
-RUN pip install --no-cache-dir -r /requirements.txt
+# Expose the webserver port
+EXPOSE 8080
 
-# Copy DAGs, plugins, or any other Airflow-specific files if needed
-# COPY dags /opt/airflow/dags
-# COPY plugins /opt/airflow/plugins
-
-# Ensure the ownership of the airflow folder is correct
-RUN chown -R ${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000} /opt/airflow
-
-# Switch back to the airflow user
-USER ${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}
-
-# Set the entrypoint to Airflow (optional)
-# ENTRYPOINT ["airflow"]
+# Command to run the Airflow webserver
+CMD ["airflow", "webserver"]
