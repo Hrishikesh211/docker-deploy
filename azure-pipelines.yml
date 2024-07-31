@@ -26,20 +26,10 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
-    - task: AzureCLI@2
+    - task: Docker@2
       inputs:
-        azureSubscription: 'Development Subscription (d8501f72-cc6e-4c07-9f8c-b8523c3b63ec)'
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          echo "Logging in to Azure..."
-          az acr login --name $(containerRegistry)
-          
-          echo "Building the Docker image for airflow-webserver..."
-          docker-compose build airflow-webserver
-          
-          echo "Tagging the image for airflow-webserver..."
-          docker tag apache/airflow:2.9.3 $(containerRegistry)/$(imageRepository):$(tag)
-          
-          echo "Pushing the image for airflow-webserver to ACR..."
-          docker push $(containerRegistry)/$(imageRepository):$(tag)
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        
