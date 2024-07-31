@@ -40,7 +40,10 @@ version: '3.7'
 
 services:
   airflow-webserver:
-    image: apache/airflow:2.9.3
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: myregistry.azurecr.io/myapp/airflow-webserver:latest
     environment:
       - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
@@ -60,4 +63,4 @@ services:
       airflow webserver
       '
     restart: always
- 
+
