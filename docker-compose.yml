@@ -40,10 +40,7 @@ version: '3.7'
 
 services:
   airflow-webserver:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: myregistry.azurecr.io/myapp/airflow-webserver:latest
+    image: apache/airflow:2.9.3
     environment:
       - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
@@ -55,12 +52,8 @@ services:
       - _AIRFLOW_WWW_USER_PASSWORD=admin
     ports:
       - "8080:8080"
-    command: >
-      bash -c '
-      if ! airflow users check --username admin; then
-        airflow users create -r Admin -u admin -e admin@example.com -f Admin -l User -p admin;
-      fi &&
-      airflow webserver
-      '
+    volumes:
+      - ${WEBAPP_STORAGE_HOME}/init_airflow.sh:/init_airflow.sh
+    command: /bin/bash -c "/init_airflow.sh"
     restart: always
 
