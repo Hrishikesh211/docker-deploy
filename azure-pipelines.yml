@@ -13,7 +13,7 @@ variables:
   dockerRegistryServiceConnection: 'dde738b1-e4ee-4d16-8bfe-3bfe7a5d8abf'
   imageRepository: 'deployairflow'
   containerRegistry: 'deployairflowcicd.azurecr.io'
-  dockerfilePath: '**/Dockerfile'
+  dockerfilePath: 'Dockerfile'  # Path to Dockerfile in the root
   tag: '$(Build.BuildId)'
   vmImageName: 'ubuntu-latest'
 
