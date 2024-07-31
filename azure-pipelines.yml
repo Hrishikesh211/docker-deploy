@@ -10,32 +10,36 @@ resources:
 - repo: self
 
 variables:
-  # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: '2304366a-a596-4b67-9a99-4e1ff6b22c82'
-  imageRepository: 'dockerdevops'
+  dockerRegistryServiceConnection: 'dde738b1-e4ee-4d16-8bfe-3bfe7a5d8abf'
+  imageRepository: 'deployairflow'
   containerRegistry: 'deployairflowcicd.azurecr.io'
-  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
+  dockerfilePath: '**/Dockerfile'
   tag: '$(Build.BuildId)'
-
-  # Agent VM image name
   vmImageName: 'ubuntu-latest'
+
 stages:
-- stage: BuildAndPush
+- stage: Build
+  displayName: Build and push stage
   jobs:
   - job: Build
+    displayName: Build
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: $(vmImageName)
     steps:
-    - task: DockerCompose@0
+    - task: AzureCLI@2
       inputs:
         azureSubscription: 'Development Subscription (d8501f72-cc6e-4c07-9f8c-b8523c3b63ec)'
-        azureContainerRegistry: '{"loginServer":"deployairflowcicd.azurecr.io", "id" : "/subscriptions/d8501f72-cc6e-4c07-9f8c-b8523c3b63ec/resourceGroups/deployairflowcicd/providers/Microsoft.ContainerRegistry/registries/deployairflowcicd"}'
-        dockerComposeFile: '**/docker-compose.yml'
-        action: 'Build services'
-    - task: DockerCompose@0
-      inputs:
-        azureSubscription: 'Development Subscription (d8501f72-cc6e-4c07-9f8c-b8523c3b63ec)'
-        azureContainerRegistry: '{"loginServer":"deployairflowcicd.azurecr.io", "id" : "/subscriptions/d8501f72-cc6e-4c07-9f8c-b8523c3b63ec/resourceGroups/deployairflowcicd/providers/Microsoft.ContainerRegistry/registries/deployairflowcicd"}'
-        dockerComposeFile: '**/docker-compose.yml'
-        action: 'Push services'
-        
+        scriptType: 'ps'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          Write-Host "Logging in to Azure..."
+          az acr login --name $(containerRegistry)
+          
+          Write-Host "Building the Docker image for airflow-webserver..."
+          docker-compose build airflow-webserver
+          
+          Write-Host "Tagging the image for airflow-webserver..."
+          docker tag apache/airflow:2.9.3 "$(containerRegistry)/$(imageRepository):$(tag)"
+          
+          Write-Host "Pushing the image for airflow-webserver to ACR..."
+          docker push "$(containerRegistry)/$(imageRepository):$(tag)"
