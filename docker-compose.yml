@@ -51,7 +51,7 @@ services:
       - _AIRFLOW_WWW_USER_USERNAME=admin
       - _AIRFLOW_WWW_USER_PASSWORD=admin
     ports:
-      - "8080:8080"
+      - "8000:8000"
     command: >
       bash -c '
       if ! airflow users check --username admin; then
