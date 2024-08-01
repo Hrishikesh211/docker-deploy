@@ -9,16 +9,14 @@ resources:
 - repo: self
 
 variables:
-  # Container registry service connection established during pipeline creation
   dockerRegistryServiceConnection: 'dde738b1-e4ee-4d16-8bfe-3bfe7a5d8abf'
   imageRepository: 'dockerdevops'
   containerName: 'dockerdevops'
   containerRegistry: 'deployairflowcicd.azurecr.io'
   dockerfilePath: '**/docker-compose.yml'
   tag: '$(Build.BuildId)'
-
-  # Agent VM image name
   vmImageName: 'ubuntu-latest'
+  dockerComposeProjectName: 'dockerdeploy' # Define a valid project name
 
 stages:
 - stage: Build
@@ -29,12 +27,13 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
-      - task:  DockerCompose@1
+      - task: DockerCompose@1
         displayName: Build and push services
         inputs:
           containerregistrytype: 'Azure Container Registry'
           azureSubscription: 'Development Subscription (d8501f72-cc6e-4c07-9f8c-b8523c3b63ec)-1190'
           azureContainerRegistry: '{"loginServer":"deployairflowcicd.azurecr.io", "id" : "/subscriptions/d8501f72-cc6e-4c07-9f8c-b8523c3b63ec/resourceGroups/deployairflowcicd/providers/Microsoft.ContainerRegistry/registries/deployairflowcicd"}'
           dockerComposeFile: '$(dockerfilePath)'
+          projectName: '$(dockerComposeProjectName)' # Specify the project name
           action: 'Run a Docker Compose command'
           dockerComposeCommand: 'up -d'
