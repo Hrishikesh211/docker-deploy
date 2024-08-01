@@ -2,7 +2,6 @@
 # Build and push an image to Azure Container Registry
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
-
 trigger:
 - main
 
@@ -10,11 +9,14 @@ resources:
 - repo: self
 
 variables:
+  # Container registry service connection established during pipeline creation
   dockerRegistryServiceConnection: 'dde738b1-e4ee-4d16-8bfe-3bfe7a5d8abf'
   imageRepository: 'deployairflow'
   containerRegistry: 'deployairflowcicd.azurecr.io'
-  dockerfilePath: 'Dockerfile'  # Path to Dockerfile in the root
+  dockerfilePath: '**/docker-compose.yml'
   tag: '$(Build.BuildId)'
+
+  # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
 stages:
@@ -22,14 +24,14 @@ stages:
   displayName: Build and push stage
   jobs:
   - job: Build
-    displayName: Build
+    displayName: Build and push
     pool:
       vmImage: $(vmImageName)
     steps:
-    - task: Docker@2
-      inputs:
-        command: buildAndPush
-        repository: $(imageRepository)
-        dockerfile: $(dockerfilePath)
-        containerRegistry: $(dockerRegistryServiceConnection)
-        
+      - task: DockerCompose@0
+        displayName: Build and push services
+        inputs:
+          containerregistrytype: 'Azure Container Registry'
+          azureSubscription: 'Development Subscription (d8501f72-cc6e-4c07-9f8c-b8523c3b63ec)-1190'
+          azureContainerRegistry: '{"loginServer":"deployairflowcicd.azurecr.io", "id" : "/subscriptions/d8501f72-cc6e-4c07-9f8c-b8523c3b63ec/resourceGroups/deployairflowcicd/providers/Microsoft.ContainerRegistry/registries/deployairflowcicd"}'
+          dockerComposeFile: '$(dockerfilePath)'
