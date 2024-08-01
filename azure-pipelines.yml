@@ -35,3 +35,5 @@ stages:
           azureSubscription: 'Development Subscription (d8501f72-cc6e-4c07-9f8c-b8523c3b63ec)-1190'
           azureContainerRegistry: '{"loginServer":"deployairflowcicd.azurecr.io", "id" : "/subscriptions/d8501f72-cc6e-4c07-9f8c-b8523c3b63ec/resourceGroups/deployairflowcicd/providers/Microsoft.ContainerRegistry/registries/deployairflowcicd"}'
           dockerComposeFile: '$(dockerfilePath)'
+          action: 'Run a Docker Compose command'
+          dockerComposeCommand: 'up -d'
