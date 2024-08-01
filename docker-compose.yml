@@ -36,12 +36,13 @@
 # Feel free to modify this file to suit your needs.
 ---
 version: '3.7'
+
 services:
   airflow-webserver:
     image: apache/airflow:2.9.3
     environment:
-      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://yuoiyqabqs:KhtjzbA4aw$xN43O@airflow-app.postgres.database.azure.com:5432/postgres
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__WEBSERVER__BASE_URL=https://airflow-docker-compose-v1-fga9gahehfbpaca0.southindia-01.azurewebsites.net
       - _AIRFLOW_DB_MIGRATE=true
@@ -49,12 +50,35 @@ services:
       - _AIRFLOW_WWW_USER_USERNAME=admin
       - _AIRFLOW_WWW_USER_PASSWORD=admin
     ports:
-      - "8000:8000"
-    command: >
-      bash -c '
-      if ! airflow users check --username admin; then
-        airflow users create -r Admin -u admin -e admin@example.com -f Admin -l User -p admin;
-      fi &&
-      airflow webserver
-      '
+      - "8080:8080"
+    command: 
+      - bash
+      - -c
+      - |
+        if ! airflow users check --username admin; then
+          airflow users create -r Admin -u admin -e admin@example.com -f Admin -l User -p admin;
+        fi &&
+        airflow webserver
     restart: always
+
+  airflow-scheduler:
+    image: apache/airflow:2.9.3
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://yuoiyqabqs:KhtjzbA4aw$xN43O@airflow-app.postgres.database.azure.com:5432/postgres
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - AIRFLOW__WEBSERVER__BASE_URL=https://airflow-docker-compose-v1-fga9gahehfbpaca0.southindia-01.azurewebsites.net
+      - _AIRFLOW_DB_MIGRATE=true
+      - _AIRFLOW_WWW_USER_CREATE=true
+      - _AIRFLOW_WWW_USER_USERNAME=admin
+      - _AIRFLOW_WWW_USER_PASSWORD=admin
+    command: 
+      - bash
+      - -c
+      - |
+        if ! airflow users check --username admin; then
+          airflow users create -r Admin -u admin -e admin@example.com -f Admin -l User -p admin;
+        fi &&
+        airflow scheduler
+    restart: always
+
