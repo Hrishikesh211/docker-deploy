@@ -28,7 +28,7 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
-      - task: DockerCompose@0
+      - task:  DockerCompose@1
         displayName: Build and push services
         inputs:
           containerregistrytype: 'Azure Container Registry'
