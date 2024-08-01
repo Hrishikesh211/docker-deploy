@@ -11,7 +11,7 @@ resources:
 variables:
   # Container registry service connection established during pipeline creation
   dockerRegistryServiceConnection: 'dde738b1-e4ee-4d16-8bfe-3bfe7a5d8abf'
-  imageRepository: 'deployairflow'
+  imageRepository: 'hrishikesh211-docker-deploy'
   containerRegistry: 'deployairflowcicd.azurecr.io'
   dockerfilePath: '**/docker-compose.yml'
   tag: '$(Build.BuildId)'
