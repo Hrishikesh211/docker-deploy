@@ -39,7 +39,9 @@ version: '3.8'
 
 services:
   airflow-webserver:
-    image: apache/airflow:2.9.3
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
       - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
@@ -50,7 +52,7 @@ services:
       - _AIRFLOW_WWW_USER_USERNAME=admin
       - _AIRFLOW_WWW_USER_PASSWORD=admin
     ports:
-      - "8080:8080"
+      - "8000:8080"
     command: >
       bash -c '
       if ! airflow users check --username admin; then
@@ -59,4 +61,8 @@ services:
       airflow webserver
       '
     restart: always
- 
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+
